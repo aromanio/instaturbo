@@ -15,7 +15,7 @@ password = config['password']
 targets = config['targetUsernames']
 
 #this is so I can dynamically change the endpoint
-endpoint = requests.get("https://www.xosoftware.app/github/instaturbo/endpoint").text.replace("\n", "")
+endpoint = 'https://www.instagram.com/<username>/'
 
 
 def turbo(nam):
@@ -31,6 +31,7 @@ def turbo(nam):
     csrf1 = r1.cookies.get_dict()['csrftoken']
 
     url2 = 'https://www.instagram.com/accounts/login/ajax/'
+    urlf = "https://www.instagram.com/accounts/edit/"
 
     h2 = {
         'accept': '*/*',
@@ -56,38 +57,54 @@ def turbo(nam):
     if r2.json()['authenticated'] == False:
         print(f'[{nam}] ERROR LOGGING IN...')
         exit()
-    else:
-        csrf = r2.cookies.get_dict()['csrftoken']
-        print(f'[{nam}] Logged In Initiating Turbo...')
+
+    csrf = r2.cookies.get_dict()['csrftoken']
+    print(f'[{nam}] Logged In Initiating Turbo...')
     turboin = True
+
+    hf = {
+        'accept': '*/*',
+        'accept-encoding': 'gzip, deflate, br',
+        'accept-language': 'en-US,en;q=0.9',
+        'content-type': 'application/x-www-form-urlencoded',
+        'origin': 'https://www.instagram.com',
+        'referer': 'https://www.instagram.com/accounts/edit/',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
+        'x-csrftoken': csrf,
+        'x-instagram-ajax': '1',
+        'x-requested-with': 'XMLHttpRequest'
+    }
+
+    headers_my_data = {
+        'accept': '*/*',
+        'accept-encoding': 'gzip, deflate, br',
+        'accept-language': 'en-US,en;q=0.9',
+        'origin': 'https://www.instagram.com',
+        'referer': 'https://www.instagram.com/accounts/edit/',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
+        'x-csrftoken': csrf,
+        'x-instagram-ajax': '1',
+        'x-requested-with': 'XMLHttpRequest'
+    }
+
+    my_data_response = s.get(urlf, headers=headers_my_data)
+
     #start monitoring the username
     while turboin == True:
         res = requests.get(endpoint.replace("<username>", nam))
         if res.status_code == 404:
             print(f'[{nam}] NAME AVAILABLE TAKING IT')
-            urlf = "https://www.instagram.com/accounts/edit/"
 
-            hf = {
-                'accept': '*/*',
-                'accept-encoding': 'gzip, deflate, br',
-                'accept-language': 'en-US,en;q=0.9',
-                'content-type': 'application/x-www-form-urlencoded',
-                'origin': 'https://www.instagram.com',
-                'referer': 'https://www.instagram.com/accounts/edit/',
-                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36',
-                'x-csrftoken': csrf,
-                'x-instagram-ajax': '1',
-                'x-requested-with': 'XMLHttpRequest'
-            }
-
+            dat1 = s.get(urlf, headers=hf)
+            dat2=dat1.json()
             df = {
-                'first_name': 'sdouhfwufv sdvcwc',
-                'email': "{}xo@xolovesyou.online".format(str(random.randint(11111111, 99999999))),
+                'first_name': dat2['first_name'],
+                'email': dat2['email'],
                 'username': nam,
-                'phone_number':'',
-                'gender': '3',
-                'biography':'turbo by xodev',
-                'external_url':'https://www.xodev.io',
+                'phone_number': dat2['phone_number'],
+                'gender': dat2['gender'],
+                'biography': dat2['biography'],
+                'external_url': dat2['external_url'],
                 'chaining_enabled': 'on'
             }
             #change the acc to the turbo name
